@@ -8,9 +8,25 @@ import json
 import aiohttp
 from dotenv import load_dotenv
 from collections import Counter
+from threading import Thread
+from http.server import HTTPServer, BaseHTTPRequestHandler
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_BOT_TOKEN')
+
+# --- Minimal HTTP server to pass Koyeb health check ---
+class Handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"OK")
+
+def run_server():
+    server = HTTPServer(("0.0.0.0", 8000), Handler)
+    server.serve_forever()
+
+Thread(target=run_server, daemon=True).start()
+# --------------------------------------------------------
 
 # Intents
 intents = discord.Intents.default()
